@@ -1,6 +1,6 @@
-# fe-breeze README
+# vue-breeze README
 
-This is the README for your extension "fe-breeze". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "vue-breeze". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
