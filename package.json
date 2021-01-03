@@ -11,13 +11,18 @@
 		"Programming Languages"
 	],
 	"activationEvents": [
-		"onLanguage:vue"
+		"onLanguage:vue",
+		"onCommand:VueBreeze.insert"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vue-breeze.helloWorld",
+				"command": "Vue-breeze.helloWorld",
+				"title": "Hello World"
+			},
+			{
+				"command": "Vue-breeze.insert",
 				"title": "Hello World"
 			}
 		],
@@ -49,7 +54,7 @@
 		"vscode:prepublish": "yarn run package",
 		"compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
 		"watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
-		"package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
+		"package": "webpack --mode production --config ./build/node-extension.webpack.config.js && tsc -watch -p ./",
 		"test-compile": "tsc -p tsconfig.json",
 		"test-watch": "tsc -watch -p ./",
 		"pretest": "yarn run test-compile && yarn run lint",

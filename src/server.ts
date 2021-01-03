@@ -12,12 +12,15 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
 } from 'vscode-languageserver';
-
 import {TextDocument} from 'vscode-languageserver-textdocument';
-
+import {promises as fs} from 'fs';
+import path from 'path';
+import {TransportKind} from 'vscode-languageclient';
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
+
+const packageJson = fs.readFile('../package.json').then((buffer) => JSON.parse(buffer.toString()));
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -27,6 +30,8 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 connection.onInitialize((params: InitializeParams) => {
+  console.log('server初始化222');
+
   const capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -67,7 +72,9 @@ connection.onInitialized(() => {
   }
 });
 
-// The example settings
+// This is the type defination of Vue Breeze plugin's setting,
+// depending on items listed in field contributes.configuration of package.json.
+// Do sync this type with the change of contributes.configuration field.
 interface VueBreezeSettings {
   maxNumberOfProblems: number;
 }
@@ -121,8 +128,7 @@ documents.onDidChangeContent((change) => {
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
   // In this simple example we get the settings for every validate run.
-  let settings = await getDocumentSettings(textDocument.uri);
-
+  const settings = (await getDocumentSettings(textDocument.uri)) || globalSettings;
   // The validator creates diagnostics for all uppercase words length 2 and more
   let text = textDocument.getText();
   let pattern = /\b[A-Z]{2,}\b/g;
@@ -173,10 +179,10 @@ connection.onDidChangeWatchedFiles((_change) => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+  console.log('on complete');
   // The pass parameter contains the position of the text document in
   // which code complete got requested. For the example we ignore this
   // info and always provide the same completion items.
-  console.log('onCompletion333', typeof _textDocumentPosition);
   return [
     {
       label: 'TypeScript',
