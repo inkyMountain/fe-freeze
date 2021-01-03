@@ -30,7 +30,7 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 connection.onInitialize((params: InitializeParams) => {
-  console.log('server初始化222');
+  console.log('server初始化');
 
   const capabilities = params.capabilities;
 
@@ -71,7 +71,6 @@ connection.onInitialized(() => {
     });
   }
 });
-
 // This is the type defination of Vue Breeze plugin's setting,
 // depending on items listed in field contributes.configuration of package.json.
 // Do sync this type with the change of contributes.configuration field.
@@ -178,21 +177,36 @@ connection.onDidChangeWatchedFiles((_change) => {
 });
 
 // This handler provides the initial list of the completion items.
-connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-  console.log('on complete');
+connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...args) => {
   // The pass parameter contains the position of the text document in
   // which code complete got requested. For the example we ignore this
   // info and always provide the same completion items.
+  // console.log('_textDocumentPosition', _textDocumentPosition);
+  const {textDocument: {uri}, position} = _textDocumentPosition;
+  const insertCommandParam = {uri, position};
+  console.log('on complete');
   return [
     {
-      label: 'TypeScript',
-      kind: CompletionItemKind.Text,
-      data: 1,
+      label: 'breeze',
+      kind: CompletionItemKind.Reference,
+      detail: 'provideCompletionItems detail',
+      documentation: 'provideCompletionItems documentation',
+      command: {
+        title: 'VueBreeze command title',
+        command: 'VueBreeze.insert',
+        arguments: [{...insertCommandParam, label: 'breeze'}],
+      },
     },
     {
-      label: 'JavaScript',
-      kind: CompletionItemKind.Text,
-      data: 2,
+      label: 'xxx',
+      kind: CompletionItemKind.Reference,
+      detail: 'provideCompletionItems detail',
+      documentation: 'provideCompletionItems documentation',
+      command: {
+        title: 'VueBreeze command title',
+        command: 'VueBreeze.insert',
+        arguments: [{...insertCommandParam, label: 'xxx'}],
+      },
     },
   ];
 });

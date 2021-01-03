@@ -1,14 +1,35 @@
 import * as vscode from 'vscode';
+import {Position, Range, TextEdit} from 'vscode';
 
 const registerCommands = (context: vscode.ExtensionContext) => {
   const insertCommand = vscode.commands.registerCommand(
     'VueBreeze.insert',
-    (documentPath: string) => {
-      // const edition = new vscode.WorkspaceEdit();
-      // edition.insert(vscode.Uri.file(documentPath), new vscode.Position(0, 0), '新插入的文字');
-      const message = 'VueBreeze insert command triggered';
-      console.log(message);
-      vscode.window.showInformationMessage(message);
+    ({
+      uri: documentPath,
+      position,
+      label,
+    }: {
+      uri: string;
+      position: vscode.Position;
+      label: string;
+    }) => {
+      const documentPathWithoutFileProtocal = documentPath.replace(/^(file:\/\/\/?)/, '/');
+      const edition = new vscode.WorkspaceEdit();
+
+      edition.insert(
+        vscode.Uri.file(documentPathWithoutFileProtocal),
+        new Position(position.line, position.character + label.length),
+        'const xxx: string = "xxx"',
+      );
+      // edition.insert(vscode.Uri.file(filePath), new vscode.Position(1, 0), '新内容' + (new Date()).getMinutes());
+      vscode.workspace.applyEdit(edition).then(
+        (res) => {
+          vscode.window.showInformationMessage('insert success');
+        },
+        (e) => {
+          console.log('e', e);
+        },
+      );
     },
   );
   context.subscriptions.push(insertCommand);
