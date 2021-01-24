@@ -11,11 +11,12 @@ import {
   TextDocumentPositionParams,
   TextDocumentSyncKind,
   InitializeResult,
+  WorkspaceEdit,
 } from 'vscode-languageserver';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {promises as fs} from 'fs';
 import path from 'path';
-import {TransportKind} from 'vscode-languageclient';
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
@@ -30,8 +31,6 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 connection.onInitialize((params: InitializeParams) => {
-  console.log('server初始化');
-
   const capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -47,6 +46,10 @@ connection.onInitialize((params: InitializeParams) => {
       // Tell the client that this server supports code completion.
       completionProvider: {
         resolveProvider: true,
+        // By default, "onComplete" event is only triggered when an identifier is being typed after a blank space.
+        // If triggerCharacters is given, "onComplete" event will be triggered after these characters besides blank space.
+        // e.g. "fs.readFile" "fs*readFile"(with "*" specified in "triggerCharacters" option).
+        triggerCharacters: ['.'],
       },
     },
   };
@@ -61,6 +64,7 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 connection.onInitialized(() => {
+  connection.window.showInformationMessage('Vue Breeze successfullly initialized');
   if (hasConfigurationCapability) {
     // Register for all configuration changes.
     connection.client.register(DidChangeConfigurationNotification.type, undefined);
@@ -182,31 +186,22 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
   // which code complete got requested. For the example we ignore this
   // info and always provide the same completion items.
   // console.log('_textDocumentPosition', _textDocumentPosition);
-  const {textDocument: {uri}, position} = _textDocumentPosition;
+  const {
+    textDocument: {uri},
+    position,
+  } = _textDocumentPosition;
   const insertCommandParam = {uri, position};
-  console.log('on complete');
   return [
     {
-      label: 'breeze',
+      label: 'skipToUrl',
       kind: CompletionItemKind.Reference,
       detail: 'provideCompletionItems detail',
       documentation: 'provideCompletionItems documentation',
-      command: {
-        title: 'VueBreeze command title',
-        command: 'VueBreeze.insert',
-        arguments: [{...insertCommandParam, label: 'breeze'}],
-      },
-    },
-    {
-      label: 'xxx',
-      kind: CompletionItemKind.Reference,
-      detail: 'provideCompletionItems detail',
-      documentation: 'provideCompletionItems documentation',
-      command: {
-        title: 'VueBreeze command title',
-        command: 'VueBreeze.insert',
-        arguments: [{...insertCommandParam, label: 'xxx'}],
-      },
+      // command: {
+      //   title: 'VueBreeze command title',
+      //   command: 'VueBreeze.insert',
+      //   arguments: [{...insertCommandParam, label: 'xxx'}],
+      // },
     },
   ];
 });
@@ -215,13 +210,7 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
 // the completion list.
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
-    if (item.data === 1) {
-      item.detail = 'TypeScript details';
-      item.documentation = 'TypeScript documentation';
-    } else if (item.data === 2) {
-      item.detail = 'JavaScript details';
-      item.documentation = 'JavaScript documentation';
-    }
+    item.insertText = "native.skipToUrl({targetUrl: 'https://m.zhuanzhuan.com'})";
     return item;
   },
 );
