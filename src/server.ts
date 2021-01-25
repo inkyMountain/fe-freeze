@@ -1,3 +1,4 @@
+import {triggerCharacters, eol} from './variables';
 import {
   createConnection,
   TextDocuments,
@@ -12,10 +13,13 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
   WorkspaceEdit,
+  TextEdit,
+  InsertTextMode,
 } from 'vscode-languageserver';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {promises as fs} from 'fs';
-import path from 'path';
+import * as path from 'path';
+import {afterScriptStart as positionAfterScriptStart} from './utils/positionSeekers';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -49,7 +53,7 @@ connection.onInitialize((params: InitializeParams) => {
         // By default, "onComplete" event is only triggered when an identifier is being typed after a blank space.
         // If triggerCharacters is given, "onComplete" event will be triggered after these characters besides blank space.
         // e.g. "fs.readFile" "fs*readFile"(with "*" specified in "triggerCharacters" option).
-        triggerCharacters: ['.'],
+        triggerCharacters,
       },
     },
   };
@@ -197,11 +201,16 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
       kind: CompletionItemKind.Reference,
       detail: 'provideCompletionItems detail',
       documentation: 'provideCompletionItems documentation',
-      // command: {
-      //   title: 'VueBreeze command title',
-      //   command: 'VueBreeze.insert',
-      //   arguments: [{...insertCommandParam, label: 'xxx'}],
-      // },
+      insertTextFormat: 2,
+      command: {
+        title: 'VueBreeze command title',
+        command: 'VueBreeze.insert',
+        arguments: [{...insertCommandParam, label: 'xxx'}],
+      },
+      data: {
+        uri,
+        position,
+      },
     },
   ];
 });
@@ -210,7 +219,38 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
 // the completion list.
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
-    item.insertText = "native.skipToUrl({targetUrl: 'https://m.zhuanzhuan.com'})";
+    const {uri, position} = item.data;
+    const document = documents.all().find((doc) => doc.uri === uri);
+    if (!document) {
+      return item;
+    }
+
+    const text = document.getText();
+    const isNativeAlreadyImported =
+      (text.match(/import native from '@zz-common\/native-adapter'/)?.length ?? 0) >= 1;
+    item.insertText = `native.skipToUrl({
+  targetUrl: '\${1:https://m.zhuanzhuan.com}',
+  needClose: \${2| '0', '1' |}
+})
+$0`;
+    item.insertTextFormat = 2;
+    item.additionalTextEdits = item.additionalTextEdits ?? [];
+    const textEditPosition = positionAfterScriptStart(document);
+    if (textEditPosition) {
+      // TextEdit.insert generate a TextEdit object,
+      // client receive the object and do insert action according to it.
+      const edits = [];
+      if (!isNativeAlreadyImported) {
+        edits.push(
+          TextEdit.insert(
+            textEditPosition,
+            `import native from '@zz-common/native-adapter';${eol}`,
+          ),
+        );
+      }
+      item.additionalTextEdits.push(...edits);
+    }
+    item.insertTextMode = InsertTextMode.adjustIndentation;
     return item;
   },
 );
