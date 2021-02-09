@@ -3489,6 +3489,11 @@ vscode-languageserver-types@3.16.0:
   resolved "https://registry.npm.taobao.org/vscode-languageserver-types/download/vscode-languageserver-types-3.16.0.tgz?cache=0&sync_timestamp=1607941103055&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvscode-languageserver-types%2Fdownload%2Fvscode-languageserver-types-3.16.0.tgz#ecf393fc121ec6974b2da3efb3155644c514e247"
   integrity sha1-7POT/BIexpdLLaPvsxVWRMUU4kc=
 
+vscode-languageserver-types@^3.16.0:
+  version "3.16.0"
+  resolved "https://rcnpm.zhuanspirit.com/vscode-languageserver-types/download/vscode-languageserver-types-3.16.0.tgz#ecf393fc121ec6974b2da3efb3155644c514e247"
+  integrity sha1-7POT/BIexpdLLaPvsxVWRMUU4kc=
+
 vscode-languageserver@^6.1.1:
   version "6.1.1"
   resolved "https://registry.npm.taobao.org/vscode-languageserver/download/vscode-languageserver-6.1.1.tgz#d76afc68172c27d4327ee74332b468fbc740d762"

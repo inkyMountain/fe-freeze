@@ -15,11 +15,13 @@ import {
   WorkspaceEdit,
   TextEdit,
   InsertTextMode,
+  InsertTextFormat,
 } from 'vscode-languageserver';
 import {TextDocument} from 'vscode-languageserver-textdocument';
 import {promises as fs} from 'fs';
 import * as path from 'path';
 import {afterScriptStart as positionAfterScriptStart} from './utils/positionSeekers';
+import {parse} from './parser/htmlParser';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -41,8 +43,7 @@ connection.onInitialize((params: InitializeParams) => {
   // If not, we fall back using global settings.
   hasConfigurationCapability = !!capabilities.workspace?.configuration;
   hasWorkspaceFolderCapability = !!capabilities.workspace?.workspaceFolders;
-  hasDiagnosticRelatedInformationCapability = !!capabilities.textDocument?.publishDiagnostics
-    ?.relatedInformation;
+  hasDiagnosticRelatedInformationCapability = !!capabilities.textDocument?.publishDiagnostics?.relatedInformation;
 
   const result: InitializeResult = {
     capabilities: {
@@ -104,7 +105,7 @@ connection.onDidChangeConfiguration((change) => {
   }
 
   // Revalidate all open text documents
-  documents.all().forEach(validateTextDocument);
+  // documents.all().forEach(validateTextDocument);
 });
 
 function getDocumentSettings(resource: string): Thenable<VueBreezeSettings> {
@@ -130,7 +131,7 @@ documents.onDidClose((e) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-  validateTextDocument(change.document);
+  // validateTextDocument(change.document);
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
@@ -221,19 +222,23 @@ connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
     const {uri, position} = item.data;
     const document = documents.all().find((doc) => doc.uri === uri);
+    const offset = document?.offsetAt(position);
+    const htmlDocument = parse(document!.getText());
+    // todo offer different compelitions according to node type, like <template> <script> or <style>
+    const node = htmlDocument.findNodeBefore(offset!);
+    console.log('node', node);
     if (!document) {
       return item;
     }
 
     const text = document.getText();
-    const isNativeAlreadyImported =
-      (text.match(/import native from '@zz-common\/native-adapter'/)?.length ?? 0) >= 1;
+    const isNativeAlreadyImported = (text.match(/import native from '@zz-common\/native-adapter'/)?.length ?? 0) >= 1;
     item.insertText = `native.skipToUrl({
   targetUrl: '\${1:https://m.zhuanzhuan.com}',
   needClose: \${2| '0', '1' |}
 })
 $0`;
-    item.insertTextFormat = 2;
+    item.insertTextFormat = InsertTextFormat.Snippet;
     item.additionalTextEdits = item.additionalTextEdits ?? [];
     const textEditPosition = positionAfterScriptStart(document);
     if (textEditPosition) {
@@ -241,12 +246,7 @@ $0`;
       // client receive the object and do insert action according to it.
       const edits = [];
       if (!isNativeAlreadyImported) {
-        edits.push(
-          TextEdit.insert(
-            textEditPosition,
-            `import native from '@zz-common/native-adapter';${eol}`,
-          ),
-        );
+        edits.push(TextEdit.insert(textEditPosition, `import native from '@zz-common/native-adapter';${eol}`));
       }
       item.additionalTextEdits.push(...edits);
     }

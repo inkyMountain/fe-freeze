@@ -28,6 +28,15 @@
 				"reveal": "never"
 			},
 			"group": "build"
+		},
+		{
+			"type": "shell",
+			"command": "tsc",
+			"args": [
+				"--build"
+			],
+			"label": "TypeScript build task",
 		}
+		
 	]
 }
