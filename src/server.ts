@@ -27,8 +27,6 @@ import {parse} from './parser/htmlParser';
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
-const packageJson = fs.readFile('../package.json').then((buffer) => JSON.parse(buffer.toString()));
-
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
@@ -37,6 +35,7 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 connection.onInitialize((params: InitializeParams) => {
+  console.log('onInitialize');
   const capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -192,10 +191,11 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
   // info and always provide the same completion items.
   // console.log('_textDocumentPosition', _textDocumentPosition);
   const {
-    textDocument: {uri},
+    textDocument,
     position,
   } = _textDocumentPosition;
-  const insertCommandParam = {uri, position};
+  const insertCommandParam = {uri: textDocument.uri, position};
+  // TODO: Offer different compelitions according to node type, like <template> <script> or <style>
   return [
     {
       label: 'skipToUrl',
@@ -209,7 +209,7 @@ connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams, ...a
         arguments: [{...insertCommandParam, label: 'xxx'}],
       },
       data: {
-        uri,
+        uri: textDocument.uri,
         position,
       },
     },
@@ -224,7 +224,6 @@ connection.onCompletionResolve(
     const document = documents.all().find((doc) => doc.uri === uri);
     const offset = document?.offsetAt(position);
     const htmlDocument = parse(document!.getText());
-    // todo offer different compelitions according to node type, like <template> <script> or <style>
     const node = htmlDocument.findNodeBefore(offset!);
     console.log('node', node);
     if (!document) {

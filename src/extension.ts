@@ -46,6 +46,9 @@ export function activate(context: ExtensionContext) {
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   };
+  console.log('xxx111');
+  
+  
 
   // Create the language client and start the client.
   client = new LanguageClient('VueBreeze', 'Vue Breeze', serverOptions, clientOptions);

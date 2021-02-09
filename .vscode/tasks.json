@@ -12,7 +12,7 @@
 			],
 			"isBackground": true,
 			"presentation": {
-				"reveal": "never"
+				"reveal": "always"
 			},
 			"group": {
 				"kind": "build",
@@ -21,13 +21,13 @@
 		},
 		{
 			"type": "npm",
-			"script": "test-watch",
+			"script": "tsc-watch",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"presentation": {
-				"reveal": "never"
+				"reveal": "always",
 			},
-			"group": "build"
+			"group": "build",
 		},
 		{
 			"type": "shell",
@@ -36,7 +36,6 @@
 				"--build"
 			],
 			"label": "TypeScript build task",
-		}
-		
+		},
 	]
 }

@@ -1,5 +1,5 @@
-import {parse} from './parser/htmlParser';
-
+// import {parse} from './parser/htmlParser';
+import {parse} from 'vue-eslint-parser';
 const vueText = `
 <template>
   <div class="test-component">{{data}}</div>
@@ -32,5 +32,10 @@ const vueText = `
 </style>
 `;
 
-const result = parse(vueText);
+console.time();
+const result = parse(vueText, {
+  sourceType: 'module',
+  parser: '@typescript-eslint/parser',
+});
+console.timeEnd();
 console.log('result', result);

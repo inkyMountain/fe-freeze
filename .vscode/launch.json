@@ -12,6 +12,32 @@
     },
 
     {
+      "type": "extensionHost",
+      "name": "Vue Breeze Plugin Development",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}",
+        "--disable-extensions"
+      ],
+      "outFiles": ["${workspaceRoot}/out/**/*.js"],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "tsc-watch",
+      },
+    },
+    {
+      "name": "Attach to Server",
+      "type": "node",
+      "request": "attach",
+      "protocol": "inspector",
+      // This port should be consistent with port passed to lsp server-side debug option
+      "port": 6013,
+      "restart": true,
+      "outFiles": ["${workspaceRoot}/out/**/*.js"]
+    },
+
+    {
       "name": "Launch Client",
       "type": "extensionHost",
       "request": "launch",
@@ -20,7 +46,8 @@
       "outFiles": ["${workspaceRoot}/out/**/*.js"],
       "preLaunchTask": {
 				"type": "npm",
-				"script": "test-watch"
+				"script": "tsc-watch",
+        "problemMatcher": "$tsc-watch",
 			}
     },
     {
@@ -31,15 +58,7 @@
       "preLaunchTask": {
         "type": "npm",
         "script": "watch"
-      }
-    },
-    {
-      "name": "Attach to Server",
-      "type": "node",
-      "request": "attach",
-      "port": 6013,
-      "restart": true,
-      "outFiles": ["${workspaceRoot}/out/**/*.js"]
+      },
     },
     {
       "name": "Language Server E2E Test",
@@ -51,13 +70,15 @@
         "--extensionTestsPath=${workspaceRoot}/client/out/test/index",
         "${workspaceRoot}/client/testFixture"
       ],
-      "outFiles": ["${workspaceRoot}/client/out/test/**/*.js"]
+      "outFiles": ["${workspaceRoot}/client/out/test/**/*.js"],
     },
   ],
   "compounds": [
     {
-      "name": "Webpack + Client + Server",
-      "configurations": ["Webpack Watch", "Attach to Server", "Launch Client"],
+      "name": "Vue Breeze Development",
+      // "configurations": ["Webpack Watch", "Attach to Server", "Launch Client"],
+      "configurations": ["Launch Client", "Attach to Server"],
+      "stopAll": true
     }
   ]
 }
