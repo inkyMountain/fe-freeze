@@ -1,5 +1,5 @@
-import {LanguageMode} from './languageMode';
-import {NULL_COMPLETION_LIST} from 'src/variables';
+import type {LanguageMode} from './languageMode';
+import {NULL_COMPLETION_LIST} from '../variables';
 import {CompletionItem} from 'vscode-languageclient';
 
 class ScriptMode implements LanguageMode {
