@@ -48,7 +48,14 @@
 					"description": "Traces the communication between VS Code and the language server."
 				}
 			}
-		}
+		},
+		"productIconThemes": [
+			{
+				"id": "breeze-icons",
+				"label": "Breeze Icons",
+				"path": "./theme/breeze-icon-theme.json"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run package",

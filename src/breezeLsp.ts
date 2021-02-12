@@ -17,20 +17,16 @@ import {
   DidChangeConfigurationParams,
 } from 'vscode-languageserver';
 import {afterScriptStart as positionAfterScriptStart} from './utils/positionSeekers';
-import {LanguageMode, OnCompletion, OnCompletionResolve} from './modes/LanguageMode';
+import {LanguageMode} from './modes/LanguageMode';
 import ScriptMode from './modes/ScriptMode';
 import TemplateMode from './modes/TemplateMode';
-import {triggerCharacters, eol} from './variables';
+import {triggerCharacters, eol, NULL_COMPLETION_LIST} from './variables';
 import DocumentService from './services/documentService';
 import {TextDocument} from 'vscode-languageserver-textdocument';
+import {parse as parseVueToAst, parseForESLint} from 'vue-eslint-parser';
 
 class BreezeLsp {
-  constructor() {
-    this.modes = {
-      script: new ScriptMode(),
-      template: new TemplateMode(),
-    };
-  }
+  constructor() {}
 
   modes: {[key: string]: LanguageMode} = {};
 
@@ -46,6 +42,10 @@ class BreezeLsp {
   async initServer() {
     this.connection = createConnection(ProposedFeatures.all);
     this.documentService = new DocumentService(this.connection);
+    this.modes = {
+      script: new ScriptMode(this.documentService),
+      template: new TemplateMode(this.documentService),
+    };
     this.setupLspHanlders(this.connection);
     this.connection.onInitialize(this.onInitialize);
     this.connection.onInitialized(this.onInitialized);
@@ -61,56 +61,44 @@ class BreezeLsp {
 
   onCompletion = (textDocumentPosition: TextDocumentPositionParams) => {
     const {textDocument, position} = textDocumentPosition;
-    const insertCommandParam = {uri: textDocument.uri, position};
-    return [
-      {
-        label: 'skipToUrl',
-        kind: CompletionItemKind.Reference,
-        detail: 'provideCompletionItems detail',
-        documentation: 'provideCompletionItems documentation',
-        insertTextFormat: InsertTextFormat.Snippet,
-        command: {
-          title: 'VueBreeze command title',
-          command: 'VueBreeze.insert',
-          arguments: [{...insertCommandParam, label: 'xxx'}],
-        },
-        data: {
-          position,
-          uri: textDocument.uri,
-        },
-      },
-    ];
+    const document = this.documentService.getDocument(textDocument.uri);
+    let canBeParsed = false;
+    let ast;
+    try {
+      ast = parseVueToAst(document.getText(), {sourceType: 'module', parser: '@typescript-eslint/parser'});
+      canBeParsed = true;
+    } catch (e) {
+      console.log('e', e);
+    }
+
+    // If ast parsing failed, then return empty completion list.
+    if (!canBeParsed) {
+      return NULL_COMPLETION_LIST;
+    }
+
+    const offset = document.offsetAt(position);
+
+    const isInScriptArea = ast.range[1] >= offset && ast.range[0] <= offset;
+    if (isInScriptArea) {
+      const token = ast.tokens.find(({range: [start, end]}) => {
+        return start <= offset && end >= offset;
+      });
+      return this.modes.script.onCompletion(document, position, token.value);
+    }
+    const isInTemplateArea = ast.templateBody.range[1] >= offset && ast.templateBody.range[0] <= offset;
+    if (isInTemplateArea) {
+      const token = ast.templateBody.tokens.find(({range: [start, end]}) => {
+        return start <= offset && end >= offset;
+      });
+      return this.modes.template.onCompletion(document, position, token.value);
+    }
+
+    return NULL_COMPLETION_LIST;
   };
 
   onCompletionResolve = (item: CompletionItem): CompletionItem => {
-    const {position, uri} = item.data;
-    const document = this.documentService.getDocument(uri);
-
-    if (!document) {
-      return item;
-    }
-
-    const text = document.getText();
-    const isNativeAlreadyImported = (text.match(/import native from '@zz-common\/native-adapter'/)?.length ?? 0) >= 1;
-    item.insertText = `native.skipToUrl({
-  targetUrl: '\${1:https://m.zhuanzhuan.com}',
-  needClose: \${2| '0', '1' |}
-  })
-  $0`;
-    item.insertTextFormat = InsertTextFormat.Snippet;
-    item.additionalTextEdits = item.additionalTextEdits ?? [];
-    const textEditPosition = positionAfterScriptStart(document);
-    if (textEditPosition) {
-      // TextEdit.insert generate a TextEdit object,
-      // client receive the object and do insert action according to it.
-      const edits = [];
-      if (!isNativeAlreadyImported) {
-        edits.push(TextEdit.insert(textEditPosition, `import native from '@zz-common/native-adapter';${eol}`));
-      }
-      item.additionalTextEdits.push(...edits);
-    }
-    item.insertTextMode = InsertTextMode.adjustIndentation;
-    return item;
+    const {mode} = item.data;
+    return this.modes[mode].onCompletionResolve(item) ?? item;
   };
 
   onInitialize = (params: InitializeParams) => {

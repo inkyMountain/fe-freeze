@@ -1,5 +1,5 @@
 declare module '*.json' {
-  const value: string;
+  const value: any;
   export default value;
 }
 
@@ -8,4 +8,16 @@ interface BreezeActionContext {
   range: vscode.Range;
   context: vscode.CodeActionContext;
   token: vscode.CancellationToken;
+}
+
+interface Method {
+  name: string;
+  snippet: Array<string>;
+  detail: string;
+  documentation: string;
+}
+
+interface LibraryProvider {
+  packageName: string;
+  methods: Array<Method>;
 }

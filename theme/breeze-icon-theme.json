@@ -1,0 +1,21 @@
+{
+  "fonts": [
+		{
+			"id": "zhuanzhuan",
+			"src": [
+				{
+					"path": "./zhuanzhuan.woff",
+					"format": "woff"
+				}
+			],
+			"weight": "normal",
+			"style": "normal",
+		}
+	],
+  "iconDefinitions": {
+		"symbol-unit": {
+      "fontId": "zhuanzhuan",
+			"fontCharacter": "\\e638"
+		},
+	}
+}
