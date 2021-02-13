@@ -11,13 +11,24 @@ interface BreezeActionContext {
 }
 
 interface Method {
-  name: string;
+  label: string;
   snippet: Array<string>;
   detail: string;
   documentation: string;
 }
 
+interface VueComponent {
+  label: string;
+  snippet: Array<string>;
+  detail: string;
+  documentation: string;
+  name: string;
+}
+
 interface LibraryProvider {
-  packageName: string;
-  methods: Array<Method>;
+  packageName: string,
+  isDefaultImport?: boolean,
+  defaultImportVariableName?: string,
+  methods?: Array<Method>,
+  components?: Array<VueComponent>,
 }

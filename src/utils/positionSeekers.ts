@@ -6,7 +6,7 @@ const regexps = {
   templateTag: /<template.*>[\S\s]*<\/template>/,
 };
 
-export const afterScriptStart: (document: TextDocument) => Position | undefined = (document) => {
+export const positionAfterScriptStart: (document: TextDocument) => Position | undefined = (document) => {
   const text = document.getText();
   const matchArray = text.match(regexps.scriptTag);
   const scriptTagOffset = matchArray?.index;

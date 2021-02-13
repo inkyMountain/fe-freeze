@@ -16,14 +16,14 @@ import {
   DidChangeWatchedFilesParams,
   DidChangeConfigurationParams,
 } from 'vscode-languageserver';
-import {afterScriptStart as positionAfterScriptStart} from './utils/positionSeekers';
+import {positionAfterScriptStart} from './utils/positionSeekers';
 import {LanguageMode} from './modes/LanguageMode';
 import ScriptMode from './modes/ScriptMode';
 import TemplateMode from './modes/TemplateMode';
 import {triggerCharacters, eol, NULL_COMPLETION_LIST} from './variables';
 import DocumentService from './services/documentService';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {parse as parseVueToAst, parseForESLint} from 'vue-eslint-parser';
+import {parse as parseVueToAst, parseForESLint, AST} from 'vue-eslint-parser';
 
 class BreezeLsp {
   constructor() {}
@@ -62,41 +62,50 @@ class BreezeLsp {
   onCompletion = (textDocumentPosition: TextDocumentPositionParams) => {
     const {textDocument, position} = textDocumentPosition;
     const document = this.documentService.getDocument(textDocument.uri);
-    let canBeParsed = false;
-    let ast;
+    let ast: AST.ESLintProgram;
     try {
       ast = parseVueToAst(document.getText(), {sourceType: 'module', parser: '@typescript-eslint/parser'});
-      canBeParsed = true;
     } catch (e) {
+      // If ast parsing failed, return an empty completion list.
       console.log('e', e);
-    }
-
-    // If ast parsing failed, then return empty completion list.
-    if (!canBeParsed) {
       return NULL_COMPLETION_LIST;
     }
 
+
     const offset = document.offsetAt(position);
 
+    // Caculate proper completion list while user typing in **script** tag.
     const isInScriptArea = ast.range[1] >= offset && ast.range[0] <= offset;
     if (isInScriptArea) {
       const token = ast.tokens.find(({range: [start, end]}) => {
         return start <= offset && end >= offset;
       });
-      return this.modes.script.onCompletion(document, position, token.value);
+      return this.modes.script.onCompletion({
+        document,
+        position,
+        token: token.value,
+        ast
+      });
     }
+
+    // Caculate proper completion list while user typing in **template** tag.
     const isInTemplateArea = ast.templateBody.range[1] >= offset && ast.templateBody.range[0] <= offset;
     if (isInTemplateArea) {
       const token = ast.templateBody.tokens.find(({range: [start, end]}) => {
         return start <= offset && end >= offset;
       });
-      return this.modes.template.onCompletion(document, position, token.value);
+      return this.modes.template.onCompletion({
+        document,
+        position,
+        token: token.value,
+        ast
+      });
     }
 
     return NULL_COMPLETION_LIST;
   };
 
-  onCompletionResolve = (item: CompletionItem): CompletionItem => {
+  onCompletionResolve = async (item: CompletionItem): Promise<CompletionItem> => {
     const {mode} = item.data;
     return this.modes[mode].onCompletionResolve(item) ?? item;
   };
