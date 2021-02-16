@@ -74,7 +74,8 @@ class BreezeLsp {
 
     const offset = document.offsetAt(position);
 
-    // Caculate proper completion list while user typing in **script** tag.
+    // Provide different completions according to the typing offset.
+    // e.g. inside <script> tag or <template> tag.
     const isInScriptArea = ast.range[1] >= offset && ast.range[0] <= offset;
     if (isInScriptArea) {
       const token = ast.tokens.find(({range: [start, end]}) => {
@@ -88,7 +89,6 @@ class BreezeLsp {
       });
     }
 
-    // Caculate proper completion list while user typing in **template** tag.
     const isInTemplateArea = ast.templateBody.range[1] >= offset && ast.templateBody.range[0] <= offset;
     if (isInTemplateArea) {
       const token = ast.templateBody.tokens.find(({range: [start, end]}) => {

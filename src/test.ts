@@ -1,41 +1,7 @@
-// import {parse} from './parser/htmlParser';
-import {parse} from 'vue-eslint-parser';
-const vueText = `
-<template>
-  <div class="test-component">{{data}}</div>
-</template>
-
-<script lang="ts">
-  [''].map<string>(x => x);
-  import native from '@zz-common/native-adapter';
-  import Vue from 'vue'
-  import {Component} from 'vue-property-decorator'
-
-  [].map()
-
-  @Component({
-  name: 'TestComponent',
-  })
-  export default class TestComponent extends Vue {
-  public mounted() {
-    native.skipToUrl({
-      targetUrl: 'https://m.zhuanzhuan.com',
-      needClose:  '0'
-    })
-  }
-  }
-</script>
-
-<style lang="less" scoped>
-  .test-component {
-  }
-</style>
-`;
-
-console.time();
-const result = parse(vueText, {
-  sourceType: 'module',
-  parser: '@typescript-eslint/parser',
-});
-console.timeEnd();
+const regExp = new RegExp(
+  // `import\\s+\\{.*Button.*\\}\\s+from\\s+'xxx'`,
+  `import\\s+\\{.*Button.*\\}\\s+from\\s+'@zz-common/zz-ui'`,
+  'g',
+);
+const result = `import {Button} from '@zz-common/zz-ui'`.match(regExp);
 console.log('result', result);
