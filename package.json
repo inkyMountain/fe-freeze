@@ -1,34 +1,38 @@
 {
-	"name": "vue-breeze",
-	"displayName": "Vue Breeze",
+	"name": "zz-breeze",
+	"displayName": "ZZ Breeze",
 	"description": "a frontend tool aimed for reducing boilerplate work",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.52.0"
 	},
+	"publisher": "chenyitao",
 	"categories": [
 		"Other",
 		"Programming Languages"
 	],
+	"repository": {
+		"url": "https://github.com/inkyMountain/vue-breeze",
+		"type": "git"
+	},
 	"activationEvents": [
-		"onLanguage:vue",
-		"onCommand:VueBreeze.insert"
+		"onLanguage:vue"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "Vue-breeze.helloWorld",
+				"command": "ZZ-breeze.helloWorld",
 				"title": "Hello World"
 			},
 			{
-				"command": "Vue-breeze.insert",
+				"command": "ZZ-breeze.insert",
 				"title": "Hello World"
 			}
 		],
 		"configuration": {
 			"type": "object",
-			"title": "Vue Breeze Configuration",
+			"title": "ZZ Breeze Configuration",
 			"properties": {
 				"languageServerExample.maxNumberOfProblems": {
 					"scope": "resource",
@@ -60,8 +64,8 @@
 	"scripts": {
 		"vscode:prepublish": "yarn run package",
 		"compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
-		"watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
-		"package": "webpack --mode production --config ./build/node-extension.webpack.config.js && tsc -watch -p ./",
+		"watch": "webpack --watch --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
+		"package": "webpack --mode=production --config ./build/node-extension.webpack.config.js",
 		"tsc-watch": "tsc -watch -p ./",
 		"test-compile": "tsc -p tsconfig.json",
 		"pretest": "yarn run test-compile && yarn run lint",
@@ -75,7 +79,6 @@
 		"@types/node": "^12.11.7",
 		"@types/vscode": "^1.52.0",
 		"@typescript-eslint/eslint-plugin": "^4.1.1",
-		"@typescript-eslint/parser": "^4.15.0",
 		"eslint": "^7.9.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.1.3",
@@ -83,10 +86,11 @@
 		"typescript": "^4.0.2",
 		"vscode-languageserver-types": "^3.16.0",
 		"vscode-test": "^1.4.0",
-		"webpack": "^4.44.1",
-		"webpack-cli": "^3.3.12"
+		"webpack": "^5.22.0",
+		"webpack-cli": "^4.5.0"
 	},
 	"dependencies": {
+		"@typescript-eslint/parser": "^4.15.1",
 		"lodash": "^4.17.20",
 		"vscode-languageclient": "^6.1.3",
 		"vscode-languageserver": "^6.1.1",

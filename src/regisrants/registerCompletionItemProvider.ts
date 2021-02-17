@@ -19,8 +19,8 @@ const registerCompletionItemProvider: CompletionItemProviderGenerator = (context
           detail: 'provideCompletionItems detail',
           documentation: 'provideCompletionItems documentation',
           command: {
-            title: 'VueBreeze command title',
-            command: 'VueBreeze.insert',
+            title: 'ZZBreeze command title',
+            command: 'ZZBreeze.insert',
             arguments: [{documentPath: document.uri.fsPath}],
           },
         },
@@ -30,8 +30,8 @@ const registerCompletionItemProvider: CompletionItemProviderGenerator = (context
           detail: 'provideCompletionItems detail',
           documentation: 'provideCompletionItems documentation',
           command: {
-            title: 'VueBreeze command title',
-            command: 'VueBreeze.insert',
+            title: 'ZZBreeze command title',
+            command: 'ZZBreeze.insert',
             arguments: [{documentPath: document.uri.fsPath}],
           },
         },

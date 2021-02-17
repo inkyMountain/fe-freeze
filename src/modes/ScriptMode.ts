@@ -108,10 +108,10 @@ class ScriptMode implements LanguageMode {
      * See note in Typora for detail
      */
     AST.traverseNodes(node, {
-      enterNode(n, parent) {
-        console.log('n', n);
+      enterNode(n: AST.Node, parent: AST.Node) {
+
       },
-      leaveNode(n, parent) {
+      leaveNode(n: AST.Node, parent: AST.Node) {
 
       }
     });

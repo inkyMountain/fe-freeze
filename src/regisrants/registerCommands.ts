@@ -3,7 +3,7 @@ import {Position, Range, TextEdit, WorkspaceEdit} from 'vscode';
 
 const registerCommands = (context: vscode.ExtensionContext) => {
   const insertCommand = vscode.commands.registerCommand(
-    'VueBreeze.insert',
+    'ZZBreeze.insert',
     ({
       uri: documentPath,
       position,

@@ -29,21 +29,18 @@
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
       "outFiles": ["${workspaceRoot}/out/**/*.js"],
-      "preLaunchTask": {
-				"type": "npm",
-				"script": "tsc-watch",
-        "problemMatcher": "$tsc-watch",
-			}
+      // "preLaunchTask": {
+				// "type": "npm",
+				// "script": "tsc-watch",
+        // "problemMatcher": "$tsc-watch",
+			// }
     },
     {
       "name": "Webpack Watch",
       "type": "node",
       "request": "launch",
       "outFiles": ["${workspaceRoot}/dist/**/*.js"],
-      "preLaunchTask": {
-        "type": "npm",
-        "script": "watch"
-      },
+      "preLaunchTask": "webpack watch"
     },
     {
       "name": "Language Server E2E Test",
@@ -60,9 +57,9 @@
   ],
   "compounds": [
     {
-      "name": "Vue Breeze Development",
+      "name": "ZZ Breeze Development",
       // "configurations": ["Webpack Watch", "Attach to Server", "Launch Client"],
-      "configurations": ["Launch Client", "Attach to Server"],
+      "configurations": ["Webpack Watch", "Launch Client", "Attach to Server"],
       "stopAll": false
     }
   ]

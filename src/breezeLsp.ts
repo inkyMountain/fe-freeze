@@ -23,8 +23,9 @@ import TemplateMode from './modes/TemplateMode';
 import {triggerCharacters, eol, NULL_COMPLETION_LIST} from './variables';
 import DocumentService from './services/documentService';
 import {TextDocument} from 'vscode-languageserver-textdocument';
-import {parse as parseVueToAst, parseForESLint, AST} from 'vue-eslint-parser';
-
+// import * as vueEslintParser from './parser/vueEslintParser.js';
+// const {parse: parseVueToAst} = vueEslintParser;
+import {parse as parseVueToAst} from 'vue-eslint-parser';
 class BreezeLsp {
   constructor() {}
 
@@ -62,15 +63,18 @@ class BreezeLsp {
   onCompletion = (textDocumentPosition: TextDocumentPositionParams) => {
     const {textDocument, position} = textDocumentPosition;
     const document = this.documentService.getDocument(textDocument.uri);
-    let ast: AST.ESLintProgram;
+    let ast;
     try {
-      ast = parseVueToAst(document.getText(), {sourceType: 'module', parser: '@typescript-eslint/parser'});
+      ast = parseVueToAst(document.getText(), {
+        sourceType: 'module',
+        parser: '@typescript-eslint/parser',
+      });
+      // ast = parseVueToAst(document.getText(), {sourceType: 'module', parser: typeScriptParser});
     } catch (e) {
       // If ast parsing failed, return an empty completion list.
       console.log('e', e);
       return NULL_COMPLETION_LIST;
     }
-
 
     const offset = document.offsetAt(position);
 
@@ -85,27 +89,33 @@ class BreezeLsp {
         document,
         position,
         token: token.value,
-        ast
+        ast,
       });
     }
 
-    const isInTemplateArea = ast.templateBody.range[1] >= offset && ast.templateBody.range[0] <= offset;
+    const isInTemplateArea =
+      ast.templateBody.range[1] >= offset &&
+      ast.templateBody.range[0] <= offset;
     if (isInTemplateArea) {
-      const token = ast.templateBody.tokens.find(({range: [start, end]}) => {
-        return start <= offset && end >= offset;
-      });
+      const token = ast.templateBody.tokens.find(
+        ({range: [start, end]}) => {
+          return start <= offset && end >= offset;
+        },
+      );
       return this.modes.template.onCompletion({
         document,
         position,
         token: token.value,
-        ast
+        ast,
       });
     }
 
     return NULL_COMPLETION_LIST;
   };
 
-  onCompletionResolve = async (item: CompletionItem): Promise<CompletionItem> => {
+  onCompletionResolve = async (
+    item: CompletionItem,
+  ): Promise<CompletionItem> => {
     const {mode} = item.data;
     return this.modes[mode].onCompletionResolve(item) ?? item;
   };
@@ -118,7 +128,8 @@ class BreezeLsp {
     this.capabilities = {
       configuration: !!capabilities.workspace?.configuration,
       workspaceFolders: !!capabilities.workspace?.workspaceFolders,
-      diagnoseRelateInfo: !!capabilities.textDocument?.publishDiagnostics?.relatedInformation,
+      diagnoseRelateInfo: !!capabilities.textDocument?.publishDiagnostics
+        ?.relatedInformation,
     };
 
     const result: InitializeResult = {
@@ -146,10 +157,15 @@ class BreezeLsp {
 
   onInitialized = () => {
     const connection = this.connection;
-    connection.window.showInformationMessage('Vue Breeze successfullly initialized');
+    connection.window.showInformationMessage(
+      'ZZ Breeze successfullly initialized',
+    );
     if (this.capabilities.configuration) {
       // Register for all configuration changes.
-      this.connection.client.register(DidChangeConfigurationNotification.type, undefined);
+      this.connection.client.register(
+        DidChangeConfigurationNotification.type,
+        undefined,
+      );
     }
     if (this.capabilities.workspaceFolders) {
       connection.workspace.onDidChangeWorkspaceFolders((event) => {

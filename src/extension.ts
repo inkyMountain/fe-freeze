@@ -18,7 +18,7 @@ export function activate(context: ExtensionContext) {
   registerCompletionItemProvider(context);
   registerCommands(context);
   // The server is implemented in node
-  const serverModule = context.asAbsolutePath(path.join('out', 'server.js'));
+  const serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
   // The debug options for the server
   const debugOptions = {execArgv: ['--nolazy', '--inspect=6013']};
 
@@ -46,12 +46,9 @@ export function activate(context: ExtensionContext) {
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   };
-  console.log('xxx111');
-  
-  
 
   // Create the language client and start the client.
-  client = new LanguageClient('VueBreeze', 'Vue Breeze', serverOptions, clientOptions);
+  client = new LanguageClient('ZZBreeze', 'ZZ Breeze', serverOptions, clientOptions);
   // Start the client. This will also launch the server
   client.start();
 }
