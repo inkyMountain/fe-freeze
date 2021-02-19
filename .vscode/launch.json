@@ -8,7 +8,7 @@
       "name": "测试专用",
       "program": "${workspaceFolder}/src/test.ts",
       "preLaunchTask": "TypeScript build task",
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
     },
 
     {
@@ -19,7 +19,7 @@
       // This port should be consistent with port passed to lsp server-side debug option
       "port": 6013,
       "restart": true,
-      "outFiles": ["${workspaceRoot}/out/**/*.js"]
+      "outFiles": ["${workspaceRoot}/dist/**/*.js"]
     },
 
     {
@@ -28,7 +28,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-      "outFiles": ["${workspaceRoot}/out/**/*.js"],
+      "outFiles": ["${workspaceRoot}/dist/**/*.js"],
       // "preLaunchTask": {
 				// "type": "npm",
 				// "script": "tsc-watch",
